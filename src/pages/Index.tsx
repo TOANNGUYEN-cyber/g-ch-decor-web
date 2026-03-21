@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
 
 const PromoBar = lazy(() => import("@/components/PromoBar"));
 const ServicesSection = lazy(() => import("@/components/ServicesSection"));
@@ -14,7 +13,6 @@ const Index = () => (
   <div className="min-h-screen">
     <Navbar />
     <main>
-      <HeroSection />
       <Suspense fallback={null}>
         <PromoBar />
         <ServicesSection />

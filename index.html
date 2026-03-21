@@ -15,11 +15,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Preload hero images — LCP critical (from public/) -->
+    <!-- Preload hero images — LCP critical -->
     <link rel="preload" as="image" href="/hero-mobile.webp" type="image/webp" fetchpriority="high" media="(max-width: 767px)" />
     <link rel="preload" as="image" href="/hero-desktop.webp" type="image/webp" fetchpriority="high" media="(min-width: 768px)" />
 
-    <!-- Google Fonts — defer, use system fonts first -->
+    <!-- Google Fonts — defer -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" /></noscript>
 
@@ -70,25 +70,32 @@
     }
     </script>
 
-    <!-- Critical inline CSS for instant hero paint -->
+    <!-- Critical inline CSS — hero paints BEFORE any external CSS -->
     <style>
-      #hero-shell{position:fixed;top:0;left:0;height:85vh;width:100%;overflow:hidden;background:#1a1814;z-index:0}
+      *{margin:0;padding:0;box-sizing:border-box}
+      body{background:#f9f7f5;color:#1f1c18}
+      #hero-shell{position:relative;height:85vh;width:100%;overflow:hidden;background:#1a1814}
       @media(min-width:768px){#hero-shell{height:100vh}}
       #hero-shell img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
       #hero-shell .overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6) 0%,rgba(0,0,0,.2) 60%,rgba(0,0,0,.1) 100%)}
       #hero-shell .content{position:relative;z-index:10;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:0 1.5rem 4rem}
       @media(min-width:768px){#hero-shell .content{padding:0 3rem 7rem}}
-      #hero-shell .content p{font-family:sans-serif;font-size:.75rem;text-transform:uppercase;letter-spacing:.3em;color:rgba(255,255,255,.8);margin-bottom:1rem}
-      #hero-shell .content h1{font-family:serif;font-size:2.25rem;font-weight:300;color:#fff;line-height:1.1;max-width:56rem}
+      #hero-shell .content p{font-family:system-ui,sans-serif;font-size:.75rem;text-transform:uppercase;letter-spacing:.3em;color:rgba(255,255,255,.8);margin-bottom:1rem}
+      #hero-shell .content h1{font-family:Georgia,serif;font-size:2.25rem;font-weight:300;color:#fff;line-height:1.1;max-width:56rem}
       @media(min-width:768px){#hero-shell .content h1{font-size:3.75rem}}
       @media(min-width:1024px){#hero-shell .content h1{font-size:4.5rem}}
-      #hero-shell.is-hidden{opacity:0;pointer-events:none;transition:opacity .2s}
+      #hero-shell .btns{display:flex;flex-wrap:wrap;gap:1rem;margin-top:2rem}
+      #hero-shell .btn{display:inline-flex;align-items:center;gap:.75rem;padding:1rem 2rem;background:rgba(255,255,255,.1);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.3);color:#fff;font-family:system-ui,sans-serif;font-size:.7rem;font-weight:500;text-transform:uppercase;letter-spacing:.2em;text-decoration:none}
+      #hero-shell .scroll-cue{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;z-index:10}
+      #hero-shell .scroll-cue span{font-family:system-ui,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.3em;color:rgba(255,255,255,.5)}
+      #hero-shell .scroll-cue div{width:1px;height:2rem;background:rgba(255,255,255,.3);animation:bounce 2s infinite}
+      @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
     </style>
   </head>
 
   <body>
-    <!-- Static hero shell — paints BEFORE any JS -->
-    <div id="hero-shell" aria-hidden="true">
+    <!-- Static hero — paints INSTANTLY before any JS/CSS loads -->
+    <div id="hero-shell" aria-label="Giới thiệu Toàn Phát Ceramic">
       <picture>
         <source srcset="/hero-mobile.webp" type="image/webp" media="(max-width: 767px)" />
         <source srcset="/hero-desktop.webp" type="image/webp" media="(min-width: 768px)" />
@@ -98,6 +105,20 @@
       <div class="content">
         <p>Showroom gạch ốp lát 5 sao — Phú Thọ</p>
         <h1>Gạch ốp lát cao cấp <br><em style="font-style:italic">Toàn Phát Ceramic</em></h1>
+        <div class="btns">
+          <a href="#products" class="btn">
+            Khám phá sản phẩm
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-7-7 7 7-7 7"/></svg>
+          </a>
+          <a href="tel:0344399399" class="btn">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            0344.399.399
+          </a>
+        </div>
+      </div>
+      <div class="scroll-cue">
+        <span>Cuộn xuống</span>
+        <div></div>
       </div>
     </div>
 

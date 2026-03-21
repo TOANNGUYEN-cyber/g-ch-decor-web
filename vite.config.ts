@@ -25,7 +25,21 @@ export default defineConfig({
       },
     },
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: "async-css",
+      enforce: "post",
+      transformIndexHtml(html) {
+        // Make Tailwind CSS non-render-blocking so hero-shell paints instantly
+        return html.replace(
+          /<link rel="stylesheet" crossorigin href="(\/assets\/[^"]+\.css)">/g,
+          '<link rel="stylesheet" crossorigin href="$1" media="print" onload="this.media=\'all\'">' +
+          '<noscript><link rel="stylesheet" crossorigin href="$1"></noscript>'
+        );
+      },
+    },
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
