@@ -9,6 +9,9 @@ interface Product {
   size: string | null;
   room_type: string | null;
   in_stock: boolean;
+  category: string | null;
+  pattern: string | null;
+  price: number | null;
 }
 
 const ProductForm = ({ product, onClose }: { product: Product | null; onClose: () => void }) => {
@@ -19,6 +22,9 @@ const ProductForm = ({ product, onClose }: { product: Product | null; onClose: (
     size: product?.size || "",
     room_type: product?.room_type || "",
     in_stock: product?.in_stock ?? true,
+    category: product?.category || "vietnam",
+    pattern: product?.pattern || "",
+    price: product?.price || 0,
   });
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -60,6 +66,11 @@ const ProductForm = ({ product, onClose }: { product: Product | null; onClose: (
           {form.image_url && <img src={form.image_url} alt="Preview" className="mt-2 w-32 h-32 object-cover" />}
         </div>
 
+        <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} className="w-full px-4 py-3 border border-border bg-background font-body text-sm">
+          <option value="vietnam">Việt Nam</option>
+          <option value="imported">Nhập khẩu</option>
+        </select>
+
         <select value={form.origin} onChange={(e) => setForm((f) => ({ ...f, origin: e.target.value }))} className="w-full px-4 py-3 border border-border bg-background font-body text-sm">
           <option value="">Xuất xứ</option>
           <option value="Tây Ban Nha">Tây Ban Nha</option>
@@ -77,6 +88,15 @@ const ProductForm = ({ product, onClose }: { product: Product | null; onClose: (
           <option value="120x120">120x120</option>
         </select>
 
+        <select value={form.pattern} onChange={(e) => setForm((f) => ({ ...f, pattern: e.target.value }))} className="w-full px-4 py-3 border border-border bg-background font-body text-sm">
+          <option value="">Bộ vân</option>
+          <option value="Vân đá">Vân đá</option>
+          <option value="Vân gỗ">Vân gỗ</option>
+          <option value="Vân cement">Vân cement</option>
+          <option value="Trơn màu">Trơn màu</option>
+          <option value="Mosaic">Mosaic</option>
+        </select>
+
         <select value={form.room_type} onChange={(e) => setForm((f) => ({ ...f, room_type: e.target.value }))} className="w-full px-4 py-3 border border-border bg-background font-body text-sm">
           <option value="">Loại phòng</option>
           <option value="Phòng khách">Phòng khách</option>
@@ -85,6 +105,11 @@ const ProductForm = ({ product, onClose }: { product: Product | null; onClose: (
           <option value="Bếp">Bếp</option>
           <option value="Sân vườn">Sân vườn</option>
         </select>
+
+        <div>
+          <label className="font-body text-sm text-muted-foreground mb-1 block">Giá (đ/m²)</label>
+          <input type="number" placeholder="VD: 275000" value={form.price || ""} onChange={(e) => setForm((f) => ({ ...f, price: parseInt(e.target.value) || 0 }))} className="w-full px-4 py-3 border border-border bg-background font-body text-sm focus:outline-none focus:border-accent" />
+        </div>
 
         <label className="flex items-center gap-2 font-body text-sm">
           <input type="checkbox" checked={form.in_stock} onChange={(e) => setForm((f) => ({ ...f, in_stock: e.target.checked }))} />

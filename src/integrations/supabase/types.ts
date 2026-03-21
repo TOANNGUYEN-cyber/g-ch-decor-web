@@ -13,6 +13,9 @@ export type Database = {
           room_type: string | null;
           in_stock: boolean;
           created_at: string;
+          category: string | null;
+          pattern: string | null;
+          price: number | null;
         };
         Insert: {
           id?: string;
@@ -23,6 +26,9 @@ export type Database = {
           room_type?: string | null;
           in_stock?: boolean;
           created_at?: string;
+          category?: string | null;
+          pattern?: string | null;
+          price?: number | null;
         };
         Update: {
           id?: string;
@@ -33,6 +39,9 @@ export type Database = {
           room_type?: string | null;
           in_stock?: boolean;
           created_at?: string;
+          category?: string | null;
+          pattern?: string | null;
+          price?: number | null;
         };
         Relationships: [];
       };

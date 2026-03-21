@@ -1,29 +1,45 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { ArrowRight } from "lucide-react";
 import col1 from "@/assets/collection-1.webp";
 import col2 from "@/assets/collection-2.webp";
 import col3 from "@/assets/collection-3.webp";
 import col4 from "@/assets/collection-4.webp";
 
-const staticCollections = [
-  { img: col1, title: "Gạch vân đá cẩm thạch", desc: "Nhập khẩu Tây Ban Nha — vân marble tự nhiên", alt: "Gạch nhập khẩu Tây Ban Nha tại Toàn Phát Ceramic Phú Thọ" },
-  { img: col2, title: "Gạch đá tối cao cấp", desc: "Phong cách hiện đại sang trọng", alt: "Gạch nhập khẩu Ấn Độ tại Toàn Phát Phú Thọ" },
-  { img: col3, title: "Gạch Calacatta Italy", desc: "Cảm hứng từ đá Calacatta chính hãng", alt: "Gạch Calacatta Italy tại Toàn Phát Ceramic Phú Thọ" },
-  { img: col4, title: "Gạch ngoại thất", desc: "Gạch sân vườn, ban công bền bỉ chống trơn", alt: "Gạch ngoại thất tại Toàn Phát Ceramic Phú Thọ" },
+const staticProducts = [
+  { img: col1, title: "Gạch vân đá cẩm thạch", origin: "Tây Ban Nha", size: "80x160", price: "450.000đ/m²" },
+  { img: col2, title: "Gạch đá tối cao cấp", origin: "Ấn Độ", size: "60x120", price: "320.000đ/m²" },
+  { img: col3, title: "Gạch Calacatta Italy", origin: "Italy", size: "120x120", price: "580.000đ/m²" },
+  { img: col4, title: "Gạch ngoại thất", origin: "Việt Nam", size: "60x60", price: "185.000đ/m²" },
 ];
 
-const ROOM_FILTERS = ["Tất cả", "Phòng khách", "Phòng ngủ", "Phòng tắm", "Bếp", "Sân vườn"];
+const CATEGORY_FILTERS = ["Tất cả", "Việt Nam", "Nhập khẩu"];
 const SIZE_FILTERS = ["Tất cả", "60x60", "60x120", "80x80", "80x160", "120x120"];
+const PATTERN_FILTERS = ["Tất cả", "Vân đá", "Vân gỗ", "Vân cement", "Trơn màu", "Mosaic"];
 const ORIGIN_FILTERS = ["Tất cả", "Tây Ban Nha", "Ấn Độ", "Italy", "Việt Nam"];
+const ROOM_FILTERS = ["Tất cả", "Phòng khách", "Phòng ngủ", "Phòng tắm", "Bếp", "Sân vườn"];
+const PRICE_FILTERS = ["Tất cả", "Dưới 200k", "200k - 400k", "400k - 600k", "Trên 600k"];
 
-interface Product { id: string; name: string; image_url: string | null; origin: string | null; size: string | null; room_type: string | null; }
+interface Product {
+  id: string;
+  name: string;
+  image_url: string | null;
+  origin: string | null;
+  size: string | null;
+  room_type: string | null;
+  category: string | null;
+  pattern: string | null;
+  price: number | null;
+}
 
 const CollectionsSection = () => {
   const ref = useRef<HTMLElement>(null);
   const [inView, setInView] = useState(false);
-  const [roomFilter, setRoomFilter] = useState("Tất cả");
+  const [showFilters, setShowFilters] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState("Tất cả");
   const [sizeFilter, setSizeFilter] = useState("Tất cả");
+  const [patternFilter, setPatternFilter] = useState("Tất cả");
   const [originFilter, setOriginFilter] = useState("Tất cả");
+  const [roomFilter, setRoomFilter] = useState("Tất cả");
+  const [priceFilter, setPriceFilter] = useState("Tất cả");
   const [products, setProducts] = useState<Product[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
@@ -31,7 +47,10 @@ const CollectionsSection = () => {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } }, { rootMargin: "200px" });
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } },
+      { rootMargin: "200px" }
+    );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
@@ -44,95 +63,194 @@ const CollectionsSection = () => {
       try {
         const { supabase } = await import("@/integrations/supabase/client");
         let query = supabase.from("products").select("*").eq("in_stock", true).order("created_at", { ascending: false });
-        if (roomFilter !== "Tất cả") query = query.eq("room_type", roomFilter);
+
+        if (categoryFilter === "Việt Nam") query = query.eq("category", "vietnam");
+        else if (categoryFilter === "Nhập khẩu") query = query.neq("category", "vietnam");
+
         if (sizeFilter !== "Tất cả") query = query.eq("size", sizeFilter);
         if (originFilter !== "Tất cả") query = query.eq("origin", originFilter);
+        if (roomFilter !== "Tất cả") query = query.eq("room_type", roomFilter);
+        if (patternFilter !== "Tất cả") query = query.eq("pattern", patternFilter);
+
+        if (priceFilter === "Dưới 200k") query = query.lt("price", 200000);
+        else if (priceFilter === "200k - 400k") query = query.gte("price", 200000).lte("price", 400000);
+        else if (priceFilter === "400k - 600k") query = query.gte("price", 400000).lte("price", 600000);
+        else if (priceFilter === "Trên 600k") query = query.gt("price", 600000);
+
         const { data } = await query;
         setProducts(data || []);
       } catch { setProducts([]); }
       finally { setIsLoading(false); }
     })();
-  }, [inView, fetched, roomFilter, sizeFilter, originFilter]);
+  }, [inView, fetched, categoryFilter, sizeFilter, patternFilter, originFilter, roomFilter, priceFilter]);
 
-  const handleRoomFilter = useCallback((v: string) => { setRoomFilter(v); setFetched(false); }, []);
-  const handleSizeFilter = useCallback((v: string) => { setSizeFilter(v); setFetched(false); }, []);
-  const handleOriginFilter = useCallback((v: string) => { setOriginFilter(v); setFetched(false); }, []);
+  const resetFetched = useCallback(() => setFetched(false), []);
 
+  const activeFilterCount = [categoryFilter, sizeFilter, patternFilter, originFilter, roomFilter, priceFilter].filter(f => f !== "Tất cả").length;
   const hasProducts = products && products.length > 0;
-  const animStyle = (delay: number) => ({
-    opacity: inView ? 1 : 0,
-    transform: inView ? "translateY(0)" : "translateY(30px)",
-    transition: `opacity 0.7s ease ${delay}s, transform 0.7s ease ${delay}s`,
-  });
+
+  const formatPrice = (price: number | null) => {
+    if (!price) return "";
+    return new Intl.NumberFormat("vi-VN").format(price) + "đ/m²";
+  };
 
   return (
-    <section id="products" className="py-24 md:py-40 bg-secondary" ref={ref} aria-label="Bộ sưu tập gạch ốp lát">
+    <section id="products" className="py-16 md:py-24 bg-background" ref={ref} aria-label="Sản phẩm gạch ốp lát">
       <div className="section-padding">
-        <div style={animStyle(0)} className="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-8">
           <div>
-            <p className="font-body text-xs uppercase tracking-[0.3em] text-muted-foreground mb-6">Bộ sưu tập gạch nhập khẩu</p>
-            <h2 className="section-title">Khám phá <em className="italic">gạch ốp lát cao cấp</em></h2>
+            <p className="font-body text-xs uppercase tracking-[0.3em] text-muted-foreground mb-4">Khám phá sản phẩm</p>
+            <h2 className="font-display text-3xl md:text-4xl font-light uppercase tracking-wide">
+              Sản phẩm
+            </h2>
           </div>
-          <a href="#" className="btn-outline mt-8 md:mt-0 self-start md:self-auto">Xem tất cả <ArrowRight className="w-4 h-4" /></a>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="mt-4 md:mt-0 inline-flex items-center gap-2 font-body text-xs uppercase tracking-[0.15em] px-5 py-2.5 border border-border hover:border-foreground transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" d="M3 6h18M7 12h10M10 18h4" />
+            </svg>
+            Bộ lọc {activeFilterCount > 0 && `(${activeFilterCount})`}
+          </button>
         </div>
 
-        {(hasProducts || isLoading) && (
-          <div style={animStyle(0.2)} className="mb-12 space-y-4">
-            <FilterRow label="Phòng" options={ROOM_FILTERS} value={roomFilter} onChange={handleRoomFilter} />
-            <FilterRow label="Kích thước" options={SIZE_FILTERS} value={sizeFilter} onChange={handleSizeFilter} />
-            <FilterRow label="Xuất xứ" options={ORIGIN_FILTERS} value={originFilter} onChange={handleOriginFilter} />
+        {/* Category tabs */}
+        <div className="flex gap-0 border-b border-border mb-8">
+          {CATEGORY_FILTERS.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => { setCategoryFilter(cat); resetFetched(); }}
+              className={`font-body text-xs uppercase tracking-[0.15em] px-6 py-3 border-b-2 transition-colors ${
+                categoryFilter === cat
+                  ? "border-foreground text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Expandable filters */}
+        {showFilters && (
+          <div className="mb-8 p-6 bg-secondary border border-border space-y-4 animate-fade-in">
+            <FilterRow label="Kích thước" options={SIZE_FILTERS} value={sizeFilter} onChange={(v) => { setSizeFilter(v); resetFetched(); }} />
+            <FilterRow label="Bộ vân" options={PATTERN_FILTERS} value={patternFilter} onChange={(v) => { setPatternFilter(v); resetFetched(); }} />
+            <FilterRow label="Xuất xứ" options={ORIGIN_FILTERS} value={originFilter} onChange={(v) => { setOriginFilter(v); resetFetched(); }} />
+            <FilterRow label="Loại phòng" options={ROOM_FILTERS} value={roomFilter} onChange={(v) => { setRoomFilter(v); resetFetched(); }} />
+            <FilterRow label="Giá thành" options={PRICE_FILTERS} value={priceFilter} onChange={(v) => { setPriceFilter(v); resetFetched(); }} />
+            <button
+              onClick={() => {
+                setSizeFilter("Tất cả"); setPatternFilter("Tất cả"); setOriginFilter("Tất cả");
+                setRoomFilter("Tất cả"); setPriceFilter("Tất cả"); resetFetched();
+              }}
+              className="font-body text-xs text-muted-foreground hover:text-foreground underline transition-colors"
+            >
+              Xoá tất cả bộ lọc
+            </button>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {isLoading ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />) : hasProducts ? (
+        {/* Product grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          {isLoading ? (
+            Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
+          ) : hasProducts ? (
             products.map((p, i) => (
-              <div key={p.id} style={animStyle(i * 0.15)} className="group relative overflow-hidden block">
-                <div className="overflow-hidden aspect-[8/5]">
-                  <img src={p.image_url || col1} alt={p.name} width={800} height={500} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                </div>
-                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 p-8">
-                  <h3 className="font-display text-2xl md:text-3xl font-light text-primary-foreground drop-shadow-lg">{p.name}</h3>
-                  <p className="font-body text-xs text-primary-foreground/80 mt-2 uppercase tracking-[0.15em] drop-shadow-lg">{[p.origin, p.size, p.room_type].filter(Boolean).join(" — ")}</p>
-                </div>
-              </div>
+              <ProductCard
+                key={p.id}
+                img={p.image_url || col1}
+                title={p.name}
+                origin={p.origin}
+                size={p.size}
+                price={formatPrice(p.price)}
+                pattern={p.pattern}
+                inView={inView}
+                delay={i * 0.05}
+              />
             ))
           ) : (
-            staticCollections.map((col, i) => (
-              <a key={col.title} href="#" style={animStyle(i * 0.15)} className="group relative overflow-hidden block">
-                <div className="overflow-hidden aspect-[8/5]">
-                  <img src={col.img} alt={col.alt} width={800} height={500} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                </div>
-                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 p-8">
-                  <h3 className="font-display text-2xl md:text-3xl font-light text-primary-foreground drop-shadow-lg">{col.title}</h3>
-                  <p className="font-body text-xs text-primary-foreground/80 mt-2 uppercase tracking-[0.15em] drop-shadow-lg">{col.desc}</p>
-                </div>
-              </a>
+            staticProducts.map((p, i) => (
+              <ProductCard
+                key={p.title}
+                img={p.img}
+                title={p.title}
+                origin={p.origin}
+                size={p.size}
+                price={p.price}
+                inView={inView}
+                delay={i * 0.1}
+              />
             ))
           )}
         </div>
+
+        {hasProducts && products.length >= 12 && (
+          <div className="text-center mt-12">
+            <button className="btn-outline">Xem thêm sản phẩm</button>
+          </div>
+        )}
       </div>
     </section>
   );
 };
 
-const SkeletonCard = () => (
-  <div className="relative overflow-hidden">
-    <div className="aspect-[8/5] bg-muted animate-pulse" />
-    <div className="absolute bottom-0 left-0 right-0 p-8">
-      <div className="h-8 w-3/4 mb-2 bg-muted-foreground/20 animate-pulse" />
-      <div className="h-4 w-1/2 bg-muted-foreground/20 animate-pulse" />
+const ProductCard = ({ img, title, origin, size, price, pattern, inView, delay }: {
+  img: string; title: string; origin: string | null; size: string | null;
+  price: string; pattern?: string | null; inView: boolean; delay: number;
+}) => (
+  <div
+    className={`group cursor-pointer transition-all duration-700 ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+    style={{ transitionDelay: inView ? `${delay}s` : "0ms" }}
+  >
+    <div className="aspect-square overflow-hidden mb-3 bg-secondary">
+      <img
+        src={img}
+        alt={title}
+        width={400}
+        height={400}
+        loading="lazy"
+        decoding="async"
+        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+      />
     </div>
+    <h3 className="font-display text-base md:text-lg font-light mb-1 leading-tight">{title}</h3>
+    <p className="font-body text-[11px] text-muted-foreground uppercase tracking-wider">
+      {[origin, size, pattern].filter(Boolean).join(" · ")}
+    </p>
+    {price && (
+      <p className="font-body text-sm font-medium text-accent mt-1">{price}</p>
+    )}
   </div>
 );
 
-const FilterRow = ({ label, options, value, onChange }: { label: string; options: string[]; value: string; onChange: (v: string) => void }) => (
+const SkeletonCard = () => (
+  <div>
+    <div className="aspect-square bg-muted animate-pulse mb-3" />
+    <div className="h-5 w-3/4 bg-muted animate-pulse mb-2" />
+    <div className="h-3 w-1/2 bg-muted animate-pulse" />
+  </div>
+);
+
+const FilterRow = ({ label, options, value, onChange }: {
+  label: string; options: string[]; value: string; onChange: (v: string) => void;
+}) => (
   <div className="flex flex-wrap items-center gap-2">
-    <span className="font-body text-xs uppercase tracking-[0.15em] text-muted-foreground w-20">{label}</span>
+    <span className="font-body text-[11px] uppercase tracking-[0.15em] text-muted-foreground w-20 flex-shrink-0">{label}</span>
     {options.map((opt) => (
-      <button key={opt} onClick={() => onChange(opt)} className={`font-body text-xs px-4 py-2 border transition-colors duration-200 ${value === opt ? "bg-foreground text-background border-foreground" : "bg-transparent text-foreground border-border hover:border-foreground"}`}>{opt}</button>
+      <button
+        key={opt}
+        onClick={() => onChange(opt)}
+        className={`font-body text-[11px] px-3 py-1.5 border transition-colors duration-200 ${
+          value === opt
+            ? "bg-foreground text-background border-foreground"
+            : "bg-transparent text-foreground border-border hover:border-foreground"
+        }`}
+      >
+        {opt}
+      </button>
     ))}
   </div>
 );
