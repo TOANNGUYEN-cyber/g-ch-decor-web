@@ -1,8 +1,9 @@
 import { lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 
-const PromoBar = lazy(() => import("@/components/PromoBar"));
-const ServicesSection = lazy(() => import("@/components/ServicesSection"));
+const CTASection = lazy(() => import("@/components/CTASection"));
+const FeaturedSection = lazy(() => import("@/components/FeaturedSection"));
+const CollectionsCarousel = lazy(() => import("@/components/CollectionsCarousel"));
 const CollectionsSection = lazy(() => import("@/components/CollectionsSection"));
 const StatsSection = lazy(() => import("@/components/StatsSection"));
 const AboutSection = lazy(() => import("@/components/AboutSection"));
@@ -14,8 +15,9 @@ const Index = () => (
     <Navbar />
     <main>
       <Suspense fallback={null}>
-        <PromoBar />
-        <ServicesSection />
+        <CTASection />
+        <FeaturedSection />
+        <CollectionsCarousel />
         <CollectionsSection />
         <StatsSection />
         <AboutSection />
