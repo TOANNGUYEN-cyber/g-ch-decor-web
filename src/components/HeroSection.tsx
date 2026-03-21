@@ -3,7 +3,7 @@ import { useEffect } from "react";
 const HeroSection = () => {
   useEffect(() => {
     const shell = document.getElementById("hero-shell");
-    if (shell) shell.style.display = "none";
+    if (shell) shell.classList.add("is-hidden");
   }, []);
 
   return (
