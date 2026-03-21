@@ -3,7 +3,7 @@ import { useEffect } from "react";
 const HeroSection = () => {
   useEffect(() => {
     const shell = document.getElementById("hero-shell");
-    if (shell) shell.classList.add("is-hidden");
+    if (shell) shell.remove();
   }, []);
 
   return (
@@ -11,7 +11,7 @@ const HeroSection = () => {
       <picture>
         <source srcSet="/hero-mobile.webp" type="image/webp" media="(max-width: 767px)" />
         <source srcSet="/hero-desktop.webp" type="image/webp" media="(min-width: 768px)" />
-        <img src="/hero-desktop.webp" alt="Showroom gạch ốp lát Toàn Phát Ceramic Phú Thọ" width={1920} height={1080} fetchPriority="high" decoding="sync" loading="eager" className="absolute inset-0 w-full h-full object-cover" />
+        <img src="/hero-desktop.webp" alt="Showroom gạch ốp lát Toàn Phát Ceramic Phú Thọ" width={1400} height={788} fetchPriority="high" decoding="sync" loading="eager" className="absolute inset-0 w-full h-full object-cover" />
       </picture>
 
       <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.1) 100%)" }} />

@@ -58,14 +58,6 @@
 }
 
 html { scroll-behavior: smooth; }
-/* Defer rendering of below-fold sections */
-section[id="products"],
-section[id="services"],
-section[id="about"],
-footer[id="contact"] {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 500px;
-}
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: hsl(var(--background)); }
 ::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.3); }
